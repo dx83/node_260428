@@ -9,7 +9,7 @@ router.post("/insert.json", async (req, res) => {
         const { title, content, writer } = req.body;
         const sql = 'insert into board(title, content, writer) values(?, ?, ?)';
         const result = await pool.query(sql, [title, content, writer]);
-        console.log(req.body);
+        //console.log(req.body);  // cmd에 나옴
         return res.send({ result: result[0] });
     }
     catch (err) {
@@ -22,7 +22,7 @@ router.get("/selectlist.json", async (req, res) => {
     try {
         const sql = 'select b.* from board b';
         const [result] = await pool.query(sql);
-        console.log(result);
+        //console.log(result);
         return res.send({ result: result });
     }
     catch (err) {
@@ -38,7 +38,7 @@ router.put("/updateone.json", async (req, res) => {
         const { title, content, writer } = req.body;
         const sql = 'update board set title=?, content=?, writer=? where no=?';
         const [result] = await pool.query(sql, [title, content, writer, no]);
-        console.log(result);
+        //console.log(result);
         return res.send({ result: result });
     }
     catch (err) {
@@ -53,7 +53,7 @@ router.delete('/deleteone.json', async (req, res) => {
         const {no} = req.body;
         const sql = 'delete from board where no=?';
         const [result] = await pool.query(sql, [no]);
-        console.log(result);
+        //console.log(result);
         return res.send({ result: result });
     }
     catch (err) {
