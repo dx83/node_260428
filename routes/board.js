@@ -1,8 +1,8 @@
 import express from 'express';
 const router = express.Router();
-import pool from '../db.js'
+import pool from '../db.js';
 
-// postman post => 127.0.0.1:8080/api/board/insert.json send하기
+// postman post => 127.0.0.1:8081/api/board/insert.json send하기
 // postman body => { "title":"제목", "content":"내용", "writer":"글쓴이"}
 router.post("/insert.json", async (req, res) => {
     try {
@@ -17,7 +17,7 @@ router.post("/insert.json", async (req, res) => {
     }
 });
 
-// postman GET => 127.0.0.1:8080/api/board/selectList.json
+// postman GET => 127.0.0.1:8081/api/board/selectList.json
 router.get("/selectlist.json", async (req, res) => {
     try {
         const sql = 'select b.* from board b';
@@ -30,7 +30,7 @@ router.get("/selectlist.json", async (req, res) => {
     }
 });
 
-// postman put => 127.0.0.1:8080/api/board/updateone.json?no=5
+// postman put => 127.0.0.1:8081/api/board/updateone.json?no=5
 // body => {"title":"제목변경", "content":"변경내용", "writer":"변경자"}
 router.put("/updateone.json", async (req, res) => {
     try {
