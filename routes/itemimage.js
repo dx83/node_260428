@@ -31,7 +31,7 @@ router.post("/insert.do", upload.single("image"), async (req, res) => {
     }
 });
 
-// <img src="주소" />
+// <img src="주소" /> 이미지 가져오기
 // 127.0.0.1:8081/api/itemimage/image.do?no=51
 router.get("/image.do", async (req, res) => {
     try {
@@ -43,6 +43,63 @@ router.get("/image.do", async (req, res) => {
     }
     catch (err) {
         return res.status(500).send({ err: err }); // return 생략 가능
+    }
+});
+
+// 물품별 이미지 목록
+// 127.0.0.1:8081/api/itemimage/list.do?code=14
+router.get("/list.do", async (req, res) => {
+    try {
+        const { code } = req.query;
+        const sql = `SELECT no FROM itemimage WHERE code=?`;
+        const [result] = await pool.query(sql, [code]);
+
+        let rows = [];
+        for (let obj of result) {
+            rows.push({
+                src: `/api/itemimage/image.do?no=${obj.no}`
+            })
+        }
+
+        return res.send({ result: rows });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
+
+// 물품 이미지 1개 삭제 (이미지 번호 사용)
+// 127.0.0.1:8081/api/itemimage/delete.do
+// body => { "no": 56 }
+router.delete("/delete.do", async (req, res) => {
+    try {
+        const { no } = req.body;
+        const sql = `DELETE FROM itemimage WHERE no=?`;
+        const [result] = await pool.query(sql, [no]);
+        return res.send({ result: result });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
+
+// 물품 이미지 1개 변경
+// 127.0.0.1:8081/api/itemimage/update.do
+// body => { "no": 123, "image":"파일첨부" }
+router.put("/update.do", upload.single("image"), async(req, res)=>{
+    try {
+        const { no } = req.body;
+        const sql = `UPDATE itemimage SET imagename=?, imagetype=?, imagesize=?, imagedata=?
+                        WHERE no=?`;
+        const [result] = await pool.query(sql, 
+            [req.file.originalname, req.file.mimetype, req.file.size, req.file.buffer, no]);
+        return res.send({ result: result});
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
     }
 });
 

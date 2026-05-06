@@ -51,7 +51,54 @@ router.delete("/delete.do", async (req, res) => {
     }
 });
 
-// 개인 연습용
+// 물품목록조회 get 페이지, 개수, 검색어 필요
+// 127.0.0.1:8081/api/item/list.do?page=1&cnt=10&search=
+router.get("/list.do", async (req, res) => {
+    try {
+        const { page, cnt, search } = req.query;
+        const sql = `SELECT i.* FROM item i WHERE name LIKE concat("%", ?, "%")
+                        OR detail LIKE concat("%", ? "%")
+                        ORDER BY code DESC LIMIT ?, ?`;
+        const [result] = await pool.query(sql, [
+            search, search, (Number(page) - 1) * Number(cnt), Number(cnt)]);
+
+        const sql1 = `SELECT count(*) as cnt FROM item i
+                        WHERE name LIKE concat("%", ? "%")
+                        OR detail LIKE concat("%", ?, "%")`;
+        const [result1] = await pool.query(sql1, [search, search]);
+        const total = result1[0].cnt;
+
+        return res.send({ result: result, total: total });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
+
+// 물품 1개 조회 GET
+// 127.0.01:8081/api/item/select.do?code=1
+router.get("/select.do", async (req, res) => {
+    try {
+        const { code } = req.query;
+        const sql = `SELECT i.* FROM item i WHERE code=?`;
+        const [result] = await pool.query(sql, [code]);
+
+        if (result.length == 0) {
+            return res.send({ result: result, message: '존재하지 않는 상품입니다.' });
+        }
+        return res.send({ result: result, status: 200 });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
+
+
+
+
+// 개인 연습용: 고객 비밀번호 모두 난수화하는 코드
 // 127.0.0.1:8081/api/item/test.do?email=a@a.com&name=가나다
 //router.get("/test.do", async (req, res) => {
 //    try {
