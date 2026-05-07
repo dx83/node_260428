@@ -57,7 +57,10 @@ router.get("/list.do", async (req, res) => {
         let rows = [];
         for (let obj of result) {
             rows.push({
-                src: `/api/itemimage/image.do?no=${obj.no}`
+                // react3 ItemDetail.jsx : 이미지 변경시 새로고침 안됨
+                // ts=${new Date().getTime()}`, : 리액트가 새로고침할 수 있도록...
+                src: `/api/itemimage/image.do?no=${obj.no}&ts=${new Date().getTime()}`,
+                no: obj.no,
             })
         }
 
