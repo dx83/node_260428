@@ -1,0 +1,8 @@
+build_backup
+node_modules
+api-spec.md
+.git
+.gitattributes
+.gitignore
+Dockerfile
+.dockerignore

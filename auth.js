@@ -22,7 +22,7 @@ const verifyToken = (req, res, next) => {
 }
 
 const generateAccessToken = (customer) => {
-    return jwt.sign(customer, JWT_SECRET, { expireIn: '1h' });
+    return jwt.sign(customer, JWT_SECRET, { expiresIn: '1h' });
 }
 
 const generateRefreshToken = (customer) => {

@@ -55,24 +55,24 @@ router.post('/join.do', async (req, res) => {
 // 2.로그인 post
 // 127.0.0.1:8081/api/customer/login.do
 // body => { "email": "abc@abc.com", "password":"1234" }
-//router.post('/login.do', async (req, res) => {
-//    try {
-//        const { email, password } = req.body;
-//        const sql = 'SELECT c.email, c.password, c.name FROM customer c WHERE email=?';
-//        const [result] = await pool.query(sql, [email]);
-//        console.log(result);
-//        if (result.length === 1) {
-//            if (await bcrypt.compare(password, result[0].password)) {
-//                return res.send({ result: 1 });
-//            }
-//        }
-//        return res.send({ result: 0 });
-//    }
-//    catch (err) {
-//        console.error(err);
-//        return res.status(500).send({ err: err });
-//    }
-//});
+router.post('/login.do', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const sql = 'SELECT c.email, c.password, c.name FROM customer c WHERE email=?';
+        const [result] = await pool.query(sql, [email]);
+        console.log(result);
+        if (result.length === 1) {
+            if (await bcrypt.compare(password, result[0].password)) {
+                return res.send({ result: 1 });
+            }
+        }
+        return res.send({ result: 0 });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
 // 4. 로그인에 토큰 적용 127.0.0.1:8081/api/customer/login_token.do
 // post body raw json => { "email": "a@a.com", "password":"1234" }
 //router.post('/login_token.do', async (req, res) => {
