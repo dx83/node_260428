@@ -2,7 +2,8 @@ import express from 'express';
 import boardRouter from './routes/board.js';
 import customerRouter from './routes/customer.js';
 import itemRouter from './routes/item.js';
-import itemimageRouter from './routes/itemimage.js'
+import itemimageRouter from './routes/itemimage.js';
+import purchaseRouter from './routes/purchase.js';  // 4
 
 // 1 =================================================
 import path from 'path';
@@ -26,6 +27,7 @@ app.use('/api/board', boardRouter);
 app.use('/api/customer', customerRouter);
 app.use('/api/item', itemRouter);
 app.use('/api/itemimage', itemimageRouter);
+app.use('/api/purchase', purchaseRouter); // 4
 
 // 3 =================================================
 app.use((req, res, next) => {

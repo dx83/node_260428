@@ -4,6 +4,64 @@ const router = express.Router();
 import pool from '../db.js';
 import { verifyToken, generateAccessToken, generateRefreshToken } from '../auth.js'
 
+// 7. 화원칼퇴 put
+// 회원과 연결된 데이터를 보존하기위해 실제 DELETE를 하지 않고 NULL로 처리
+// 127.0.0.1:8081/api/customer/delete.do
+// body => { "password": "a1"}
+router.put('/delete.do', verifyToken, async (req, res) => {
+    try {
+        const { password } = req.body;
+        // 토큰에서 추출한것
+        const email = req.customer.email;
+
+        const sql = 'SELECT password FROM customer WHERE email=?';
+        const [result] = await pool.query(sql, [email]);
+        if (result.length === 1) {
+            if (await bcrypt.compare(password, result[0].password)) {
+                const sql1 = 'UPDATE customer SET password=null, name=null, ' +
+                    'phone=null WHERE email=?';
+                const [result1] = await pool.query(sql1, [email]);
+                return res.send({result: result1, status:200 });
+            }
+        }
+        return res.send({ result: 0 });
+    }
+    catch (err) {
+        console.error(err);
+        return res.send({ status: -1, err: err });
+    }
+});
+
+// 6. 암호변경 put
+// 127.0.0.1:8081/api/customer/password.do
+// body => { "password": "a1", "newPassword": "변경" }
+// token은 헤더에서 보내줌 여기서 이메일은 추출함
+router.put('/password.do', verifyToken, async (req, res) => {
+    try {
+        const { password, newPassword } = req.body;
+        // 토큰에서 추출한 것
+        const email = req.customer.email;
+        // 이메일을 이용하여 DB에서 현재 패스워드 가져오기
+        const sql = 'SELECT password FROM customer WHERE email=?';
+        const [result] = await pool.query(sql, [email]);
+        // 입력된 password와 DB에서 가져온 패스워드 비교
+        if (result.length === 1) {
+            if (await bcrypt.compare(password, result[0].password)) {
+                // 변경된 비밀번호를 hash 하기
+                const hashNewPassword = await bcrypt.hash(newPassword, 10);
+                const sql1 = 'UPDATE customer SET password=? WHERE email=?';
+                const [result1] = await pool.query(sql1, [hashNewPassword, email]);
+                return res.send({ result: result1, status: 200 })
+            }
+        }
+        return res.send({ result: 0 });
+    }
+    catch (err) {
+        console.error(err);
+        return res.send({ status: -1, err: err });
+    }
+});
+
 // 5. 회원 정보 변경 put
 // 127.0.0.1:8081/api/customer/update.do
 // body { "name":"변경할이름", "phone":"010-7777-7777"}
@@ -166,5 +224,4 @@ router.post('/login_token.do', async (req, res) => {
 //        return res.status(500).send({ err: err.message });
 //    }
 //});
-
 export default router;
