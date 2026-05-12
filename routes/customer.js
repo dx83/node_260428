@@ -2,7 +2,43 @@ import bcrypt from 'bcrypt';
 import express from 'express';
 const router = express.Router();
 import pool from '../db.js';
-import { verifyToken, generateAccessToken, generateRefreshToken } from '../auth.js'
+import { verifyToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../auth.js'
+
+
+// 9. 토큰 생성 access(30m), refresh(8h) 생성
+// access token 갱신 post
+// 127.0.0.1:8081/api/customer/refreshToken.do
+// body => { "refreshToken": "..."}
+router.post('/refreshToken.do', async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        console.log('RefreshToken.do', refreshToken);
+
+        const decode = verifyRefreshToken(refreshToken);
+        console.log('/refreshToken.do', decode);    // 로그인할 때 email, name을 저장했음
+        const accessToken = generateAccessToken({ email: decode.email, name: decode.name });
+        return res.send({ result: 1, accessToken: accessToken, refreshToken: refreshToken });
+    }
+    catch (err) {
+        console.error(err);
+        return res.send({ result: 0, status: 401, message: "유효하지 않은 토큰입니다." });
+    }
+});
+
+// 8. 고객 정보 반환
+// 127.0.0.1:8081/api/customer/info.do
+// token은 헤더에서 보내줌 여기서 이메일은 추출함
+router.get('/info.do', verifyToken, async (req, res) => {
+    try {
+        const sql = 'SELECT c.email, c.name, c.phone FROM customer c WHERE c.email=?';
+        const [result] = await pool.query(sql, [req.customer.email]);
+        return res.send({ result: result, status: 200 });
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).send({ err: err });
+    }
+});
 
 // 7. 화원칼퇴 put
 // 회원과 연결된 데이터를 보존하기위해 실제 DELETE를 하지 않고 NULL로 처리
@@ -21,7 +57,7 @@ router.put('/delete.do', verifyToken, async (req, res) => {
                 const sql1 = 'UPDATE customer SET password=null, name=null, ' +
                     'phone=null WHERE email=?';
                 const [result1] = await pool.query(sql1, [email]);
-                return res.send({result: result1, status:200 });
+                return res.send({ result: result1, status: 200 });
             }
         }
         return res.send({ result: 0 });
